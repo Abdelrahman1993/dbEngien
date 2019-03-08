@@ -3,12 +3,21 @@ DBPATH="databases";
 #####################################################
 function createDatabase {
 	read -p "Enter Database Name : " dbName;
+	# regex = 
 	if [[ ! -d $DBPATH/$dbName ]];
-		then	
-			mkdir $DBPATH/$dbName;
-			echo $dbName" Database Created Successfully" ;
-		else	
-			echo "This Database is Exists";
+		then
+		if [[ $dbName =~ [a-zA-Z]+$ ]];
+			then	mkdir $DBPATH/$dbName;
+					if [[ $? -eq 0 ]]; then
+						echo -e "\n\t" $dbName" Database Created Successfully" ;
+					else	
+						echo -e "\n\t Error Done While Creating the Database" ;
+					fi
+		else
+			echo -e "\n\t the name of database is not valied"
+		fi
+	else	
+		echo -e "\n\t This Database is Exists";
 	fi
 
 }
