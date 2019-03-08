@@ -99,7 +99,7 @@ function useDatabase {
 					break ;
 					;;
 				"Show Tables")
-					echo "welcome to show section";
+					listTables;
 					break ;
 					;;
 				"Drop Table")
@@ -129,21 +129,21 @@ function useDatabase {
 	fi
 }
 
-###########################################
+#################################################
 function createTable {
 	read -p "Enter Table Name : " tlName ;
 		if [[ $tlName =~ [a-zA-Z]+$ ]]
 			then
 			echo " "
 		else
-			echo "the table name not valied"
-			main;
+			echo "\nTable name not valied\n"
+			useDatabase;
 		fi
 	if [[ ! -e $DBPATH/${DBARR[$Cho]}/$tlName ]]
 		then	
 			touch $DBPATH/${DBARR[$Cho]}/$tlName;
 			chmod +x $DBPATH/${DBARR[$Cho]}/$tlName;
-			if [[ $? -eq 0 ]]; then
+			#if [[ $? -eq 0 ]]; then
 				# echo -e "\n\t$tlName Structure" > $DBPATH/${DBARR[$Cho]}/$tlName;
 			    echo "Table Name:$tlName " >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    read -p "Enter The Number Of Columns : " tlCol;
@@ -151,7 +151,7 @@ function createTable {
 			    # echo -e "$tlName Columns" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    for (( i = 1; i <= tlCol ; i++ )); do
 
-			    	read -p "Enter Name Of The Column Number [$i] : " ColName ;
+			    	read -p "Enter Name Of The Column Number $i : " ColName ;
 			    	colArr[$i]=$ColName ; 
 					echo  -n "$ColName" >> $DBPATH/${DBARR[$Cho]}/$tlName ;
 					PS3="Enter Column $ColName Type : ";
@@ -167,7 +167,7 @@ function createTable {
 								break ;
 								;;
       						*)
-								echo -e "\n\t You Must Choose The Column Data Type"
+								echo -e "\n\t Invalid Data Type"
 						esac
 					done
 			    done
@@ -178,13 +178,13 @@ function createTable {
 					    echo $i")"$col;
 					    i=$((i+1)) ;
 				    done
-			    	read -p "Detect Primarykey value : " Pkey;
+			    	read -p "Select Primarykey value : " Pkey;
 			    	if [ $Pkey -le $tlCol -a $Pkey -gt 0 ]
 		        	then 
 		            	echo $Pkey >> $DBPATH/${DBARR[$Cho]}/$tlName;
 		            	break ;
 			        else
-						echo -e "\n\t You Must Detect Primarykey";
+						echo -e "\n\t Invalid Primarykey";
 						continue ;
 					fi 	
 				done
@@ -201,15 +201,58 @@ function createTable {
 				echo -e "===========================" >> $DBPATH/${DBARR[$Cho]}/$tlName;  
 				
 				echo $tlName": Table Created Successfully";
-			else	
-				echo -e "\n\t Error Done While Creating the Table" ;
-			fi
+			#else	
+				#echo -e "\n\t Error Done While Creating the Table" ;
+			#fi
 	else	
 		echo -e "\n\t This Table  Exists";
 	fi
 	useDatabase $Cho;
 	
 }
+
+
+################################################
+
+function listTables {
+	i=1;
+	for TB in `ls $DBPATH/${DBARR[$Cho]}/`
+	do
+		TBARR[$i]=$TB;
+		let i=i+1;
+	done
+
+	if [[ ${#TBARR[@]} -eq 0 ]]; 
+		then
+			echo "Database is Empty No tables available";
+			useDatabase $Cho;
+			return ;
+	fi
+
+	echo "Available Tables : ";
+
+	i=1;
+	for table in `ls $DBPATH/${DBARR[$Cho]}/`
+	do
+		TBARR[$i]=$table;
+		echo $i") "$table;
+		let i=i+1;
+	done
+	echo -e "\n---------------------------------------------\n";
+	useDatabase $Cho;
+	# if [[ ! "$1" ]]; then
+	# 	return 0;
+	# fi
+
+	# if [[ "$1"=="show" ]]; then
+	# 	return $Cho;
+	# fi
+
+}
+
+##################################################
+
+
 
 
 ###########################################
@@ -234,6 +277,7 @@ function  main {
 				;;
 			"Show Databases")
 				listDatabases;
+				main;
 				break ;
 				;;
 			"Drop Databas")
