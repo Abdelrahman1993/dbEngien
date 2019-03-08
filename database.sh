@@ -101,7 +101,6 @@ function useDatabase {
 					;;
 				"Show Tables")
 					listTables;
-					useDatabase
 					break ;
 					;;
 				"Drop Table")
@@ -240,7 +239,8 @@ function listTables {
 		echo $i") "$table;
 		let i=i+1;
 	done
-
+	echo -e "\n---------------------------------------------\n";
+	useDatabase $Cho;
 	# if [[ ! "$1" ]]; then
 	# 	return 0;
 	# fi
@@ -278,6 +278,7 @@ function  main {
 				;;
 			"Show Databases")
 				listDatabases;
+				main;
 				break ;
 				;;
 			"Drop Databas")
