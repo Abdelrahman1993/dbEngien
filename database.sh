@@ -107,7 +107,8 @@ function useDatabase {
 					break ;
 					;;
 				"Show Tables")
-					echo "welcome to show section";
+					listTables;
+					useDatabase
 					break ;
 					;;
 				"Drop Table")
@@ -138,6 +139,47 @@ function useDatabase {
 }
 
 ###########################################
+
+
+################################################
+
+function listTables {
+	i=1;
+	for TB in `ls $DBPATH/${DBARR[$Cho]}/`
+	do
+		TBARR[$i]=$TB;
+		let i=i+1;
+	done
+
+	if [[ ${#TBARR[@]} -eq 0 ]]; 
+		then
+			echo "Database is Empty No tables available";
+			useDatabase $Cho;
+			return ;
+	fi
+
+	echo "Available Tables : ";
+
+	i=1;
+	for table in `ls $DBPATH/${DBARR[$Cho]}/`
+	do
+		TBARR[$i]=$table;
+		echo $i") "$table;
+		let i=i+1;
+	done
+
+	# if [[ ! "$1" ]]; then
+	# 	return 0;
+	# fi
+
+	# if [[ "$1"=="show" ]]; then
+	# 	return $Cho;
+	# fi
+
+}
+
+##################################################
+
 
 function  main {
 	echo "---------------------------------------------------------------------------";
