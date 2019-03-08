@@ -97,6 +97,8 @@ function useDatabase {
 					;;
 				"CRUD Table")
 					echo "welcome to Crud section";
+					listTables;
+					crudOperations;
 					break ;
 					;;
 				"Show Tables")
@@ -267,6 +269,87 @@ function dropTable {
 }
 
 ###########################################
+
+
+
+##############################################################
+function crudOperations {
+	
+	choice=$1;
+	if [[  "$1" == "" ]]; then
+	read -p "Choose Table You Want To Operate On It From The Above Tables List : " tChoice ;
+	else {
+			let tChoice=choice;
+		}
+	fi
+
+	echo -e "\n-------------------------------------------------\n";
+
+	containsElement ${TBARR[$tChoice]} "${TBARR[@]}";
+	if [[  $? == 1 ]]; then	
+		echo -e "${TBARR[$tChoice]} Table Selected\n";
+		options=("Insert" "Update" "Display Table" "Display Record" "Delete Record" "Return TO Pervious Menu" "Return TO Main Menu" "Quit");
+		PS3="Select Operation : " ;
+		select opt in  "${options[@]}"
+		do
+			case $opt in
+				"Insert")
+					echo "welcome to insert section"
+					# insertRw;
+					# crudOperations $?;
+					break ;
+					;;
+				"Update")
+					# updateRw;
+					# crudOperations $?;
+					echo "welcome to update section"
+					break ;
+					;;
+				"Display Table")
+					# displayTB;
+					# crudOperations $?;
+					echo "welcome to Display section"
+					break ;
+					;;
+				"Display Record")
+					# displayRw;
+					# crudOperations $?;
+					echo "welcome to Display Record section"
+					break ;
+					;;
+				"Delete Record")
+					# deleteRw;
+					# crudOperations $?;
+					echo "welcome to Delete Record section"
+					break ;
+					;;
+				"Return TO Pervious Menu")
+					tableOperations $Cho;
+					;;
+				"Return TO Main Menu")
+					main;
+					;;
+				"Quit")
+					exit -1 ;
+				break
+				;;
+				*)
+				echo "---------Invalid Entry---------";
+				;;
+			esac
+		done
+
+	else
+		{
+			echo "out of range";
+			listTables;
+		}	
+	fi
+}
+
+############################################################
+
+
 function  main {
 	echo "---------------------------------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
