@@ -294,9 +294,8 @@ function crudOperations {
 		do
 			case $opt in
 				"Insert")
-					echo "welcome to insert section"
-					# insertRw;
-					# crudOperations $?;
+					insertRow;
+					crudOperations $?;
 					break ;
 					;;
 				"Update")
@@ -348,7 +347,151 @@ function crudOperations {
 }
 
 ############################################################
+declare -a tblColArr
+function show_columns()
+{
+			TblName=$1
+			colArrIndex=1      
+			noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
+			lineToShow=$((noCols+4)) # this line contains the table column's names
+			pkVal=`cut -f1 -d: $TblName | head -$((noCols+3))  | tail -1 `   #the pk value not pk name
+			echo $pkVal
+			echo "+_+_+_++_+-=-----===-=-=-=+_++++"
+			pkCol=$((pkVal+2))
+			pkColName=`cut -f1 -d: $TblName | head -$pkCol  | tail -1 `
+			echo "Table Columns : "
+			while [ $colArrIndex -le $noCols ]
+        do
+				curColName=`cut -f$colArrIndex -d: $TblName | head -$lineToShow  | tail -1 ` # to show the names of the columns
+			
+				tblColArr[$colArrIndex]=$curColName  
+				echo  " $((colArrIndex)). $curColName " 
+				colArrIndex=$((colArrIndex+1)) 
+        done  
+       echo "$pkColName Is Primary Key"
+       
+}
+#####################################
 
+declare -r FND=1;
+declare -r NOTFND=0;
+
+function get_column_type()
+{
+  #show_table_info #######
+  curNoCols=$1 #index to the column which be enterd
+  
+  noCols=$((`awk -F: '{if (NR == 2) print $2 }' $TblName`))
+  
+  curCellDataType=` cut -f2 -d: $TblName | head -$((noCols+2))  | tail -$noCols | head -$curNoCols | tail -1 `
+  if [ $curCellDataType = "Number" ] 
+   then 
+     echo $FND
+  else
+     echo $NOTFND
+  fi  
+  
+  #echo $curCellDataType
+
+}
+#############################################
+function chk_column_type()
+{
+   sendColVal=$1 #the user value
+   sendColValType=${sendColVal//[^0-9]/} 
+   if [[ $sendColVal == $sendColValType ]]
+    then 
+      echo $FND
+   else
+      echo $NOTFND   
+   fi   
+ 
+}
+##########################################
+
+function chk_pk()
+{
+    sendPkVal=$1 #the user value
+      
+       #show_table_info #######
+    noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
+	ignoredLines=$(($noCols+5))
+	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
+	  
+	pkVal=$((noCols+3)) 
+	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
+	 tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
+	  [ $tstFound ] && echo $FND || echo $NOTFND
+	  
+	
+     
+       
+}
+
+###############################################
+function insertRow {
+
+	noCols=$((`awk -F: '{if (NR == 3) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+	  ignoredLines=$(($noCols+7))
+	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
+	  pkVal=$((noCols+5)) 
+	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 ` #the pk value not pk name
+	 curNoCols=1 #index to the column which be enterd
+	 echo "Insert The Columns Values In this Sequense : " # You Want To Insert Into..pk mandatory "
+	 # to display the columns of the selected table 
+	 show_columns $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}          
+	 while [ $curNoCols -le $noCols ]
+	 do
+	  ################################## Check The Cell Data Type #################
+	  while true 
+	  do 
+	   read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
+	    
+	        curCellDataType=$(get_column_type $curNoCols )
+	        curColDataType=$(chk_column_type $cellValu )
+	        if [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 1 ]]
+	          then break 
+	         
+	        elif [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 0 ]]
+	          then break 
+	          
+	         else
+	             {
+	              echo "Column Data Type Does Not Match "
+	    
+	             }  
+	         fi  
+	                
+	     done
+	  ################### Check The Primary Key Value ##################  
+	  if [ $curNoCols -eq $pkVal ]
+	  then 
+	    {
+	          chkPkRtrn=$(chk_pk $cellValu)
+	          if [ $chkPkRtrn -eq 1 ]
+	           then
+	            {
+	               echo "There Is A Row Has This Pk Val ... Try Again"
+	               break             
+	            }
+	          fi
+	       }  
+	     fi
+	     
+	     ####################################################################
+	      if [ $curNoCols -eq $noCols ]
+	       then echo -e "$cellValu" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} 
+	      else
+	        echo -n "$cellValu:" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}  
+	      fi
+	  
+	  curNoCols=$((curNoCols+1))
+	 done
+	 return $tChoice;
+ 
+}
+
+##############################################
 
 function  main {
 	echo "---------------------------------------------------------------------------";
