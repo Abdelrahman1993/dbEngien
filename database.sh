@@ -7,7 +7,7 @@ function createDatabase {
 		then
 		if [[ $dbName =~ [a-zA-Z]+$ ]];
 			then	
-			mkdir $DBPATH/"$dbName";
+			mkdir $DBPATH/$dbName;
 			echo -e "\n\t" $dbName" Database Created Successfully" ;
 		else
 			echo -e "\n\t the name of database is not valied"
@@ -48,7 +48,7 @@ function dropDatabase {
 	if [[  "$?" == "1" ]]; 
 	then
 			rm -r $DBPATH/${DBARR[$choise]};
-			DBARR[$choise]="";
+			#DBARR[$choise]="";
 			echo -e "Deleted successfuly"
 			listDatabases;
 	else
@@ -70,11 +70,73 @@ containsElement () {
     done
     return 0
 }
+
+#############################################
+# Use Database From Databases list and list Tables Operations
+function useDatabase {
+	
+	choice=$1;
+	if [[  "$1" == "" ]]; then
+		read -p "Choose Database You Want To Use It From The Above Databases List : " Cho ;
+		else {
+			let Cho=choice;
+		}
+	fi
+	containsElement ${DBARR[$Cho]} "${DBARR[@]}";
+	if [[  $? == 1 ]]; then	
+		
+		options=("create New Table" "CRUD Table" "Show Tables" "Drop Table" "Return TO Main Menu" "Quit");
+		PS3="Enter Your Choice : " ;
+		select opt in  "${options[@]}"
+		do
+			case $opt in
+				"create New Table")
+					echo "welcome to create new section";
+					createTable;
+					break ;
+					;;
+				"CRUD Table")
+					echo "welcome to Crud section";
+					break ;
+					;;
+				"Show Tables")
+					echo "welcome to show section";
+					break ;
+					;;
+				"Drop Table")
+					echo "welcome to drop section";
+					break ;
+					;;
+				"Return TO Main Menu")
+					main;
+					break ;
+					;;
+				"Quit")
+					exit -1 ;
+					break
+				;;
+				*)
+				echo "Invalid operation entry";
+				;;
+			esac
+		done
+
+	else
+		{
+			echo "Invalid database selection entry";
+			listDatabases ;
+			handleDatabase;
+		}	
+	fi
+}
+
 ###########################################
 function createTable {
 	read -p "Enter Table Name : " tlName ;
 		if [[ $tlName =~ [a-zA-Z]+$ ]]
 			then
+			echo " "
+		else
 			echo "the table name not valied"
 			main;
 		fi
@@ -83,17 +145,17 @@ function createTable {
 			touch $DBPATH/${DBARR[$Cho]}/$tlName;
 			chmod +x $DBPATH/${DBARR[$Cho]}/$tlName;
 			if [[ $? -eq 0 ]]; then
-				echo -e "\n\t ####$tlName Structure#####" > $DBPATH/${DBARR[$Cho]}/$tlName;
+				# echo -e "\n\t$tlName Structure" > $DBPATH/${DBARR[$Cho]}/$tlName;
 			    echo "Table Name:$tlName " >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    read -p "Enter The Number Of Columns : " tlCol;
-			    echo -e "\n\t The Number Of Columns Is:$tlCol" >> $DBPATH/${DBARR[$Cho]}/$tlName;
-			    echo -e "\n\t #######$tlName Columns#######" >> $DBPATH/${DBARR[$Cho]}/$tlName;
+			    echo -e "The Number Of Columns Is:$tlCol" >> $DBPATH/${DBARR[$Cho]}/$tlName;
+			    # echo -e "$tlName Columns" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    for (( i = 1; i <= tlCol ; i++ )); do
 
 			    	read -p "Enter Name Of The Column Number [$i] : " ColName ;
 			    	colArr[$i]=$ColName ; 
 					echo  -n "$ColName" >> $DBPATH/${DBARR[$Cho]}/$tlName ;
-					PS3="Enter Column $ColName Type";
+					PS3="Enter Column $ColName Type : ";
 					select colType in Number String
 					do
 						case $colType in
@@ -131,23 +193,26 @@ function createTable {
 				while [ $colArrIndex -le $tlCol ]
 				do
 					if [ $colArrIndex -eq $tlCol ]
-					then echo -e "${colArr[colArrIndex]}" >> $DBPATH/${DBARR[$Cho]}/$tlName; # we can here add the primary key attribur as a third feild
+					then echo -e "${colArr[colArrIndex]}" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 					else 
 					echo -n "${colArr[colArrIndex]}:" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 					fi 
 					colArrIndex=$((colArrIndex+1));
 				done
-				echo -e "\n\t #############################" >> $DBPATH/${DBARR[$Cho]}/$tlName;  
+				echo -e "===========================" >> $DBPATH/${DBARR[$Cho]}/$tlName;  
 				
-				echo $tlName" Table Created Successfully";
+				echo $tlName": Table Created Successfully";
 			else	
 				echo -e "\n\t Error Done While Creating the Table" ;
 			fi
 	else	
 		echo -e "\n\t This Table  Exists";
 	fi
-	return $Cho;
+	useDatabase $Cho;
+	
 }
+
+
 ###########################################
 function  main {
 	echo "---------------------------------------------------------------------------";
@@ -164,7 +229,8 @@ function  main {
 				break ;
 				;;
 			"Use Database")
-
+				listDatabases;
+				useDatabase;
 				break ;
 				;;
 			"Show Databases")
