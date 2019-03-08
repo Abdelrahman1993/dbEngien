@@ -21,37 +21,61 @@ function createDatabase {
 	fi
 
 }
-#####################################################
-# Drop Database From Databases list
-function dropDataBase {
-	echo -e "\n"
-	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
-	containsElement ${DBARR[$choise]} "${DBARR[@]}";
-	if [[  "$?" == "1" ]]; 
-	then
-		read -p "Are You Sure Droping ${DBARR[$choise]} Database [Y/N] " response;
-		case $response in 
-			[yY][eE][sS]|[yY]) 
-	        	rm -r $DBPATH/${DBARR[$choise]};
-	        	DBARR[$choise]="";
-	        	echo -e "\t${DBARR[@]}";
-	    	;;
-	    	*)
-				main;
-			;;
-		esac	
-	else
-		{
-			printHash;
-			echo "out of range";
-			listDB;
-			dropDB;
-		}
+###################################################
+function listDatabases {
+	i=1;
+	for DB in `ls $DBPATH`
+	do
+		DBARR[$i]=$DB;
+		let i=i+1;
+	done
 
+	if [[ ${#DBARR[@]} -eq 0 ]]; 
+		then
+			echo "Databases is Empty ";
+			main;
 	fi
-
+	echo "Available Databases : ";
+	i=1;
+	for DB in `ls $DBPATH`
+	do
+		DBARR[$i]=$DB;
+		echo $i") "$DB;
+		let i=i+1;
+	done
+		# main;
 }
 
+# Drop Database From Databases list
+function dropDatabase {
+	# echo -e "\n"
+	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
+	containsElement ${DBARR[$choise]};
+	if [[  "$?" == "1" ]]; 
+	then
+			rm -r $DBPATH/${DBARR[$choise]};
+			DBARR[$choise]="";
+			echo -e "Deleted successfuly"
+	else
+		{
+			echo "out of range";
+			main;
+		}
+	fi
+}
+###########################################
+# check if array contain an element return 1 if found return 0 if not
+containsElement () {
+    local e
+    for e in "${DBARR[@]}"
+    do
+        if [[ "$e" == "$1" ]]
+            then 
+                return 1;
+        fi 
+    done
+    return 0
+}
 #==================================================
 function  main {
 	echo "---------------------------------------------------------------------------";
@@ -64,6 +88,7 @@ function  main {
 		case $opt in
 			"create New Database")
 				createDatabase;
+				main;
 				break ;
 				;;
 			"Use Database")
@@ -71,13 +96,13 @@ function  main {
 				break ;
 				;;
 			"Show Databases")
-
+				listDatabases;
 				break ;
 				;;
 			"Drop Databas")
-			echo "helll"
-				dropDataBase;
-				echo "hi"
+				listDatabases;
+				dropDatabase;
+				main;
 				break ;
 				;;
 			"Quit")
@@ -85,8 +110,9 @@ function  main {
 				break
 				;;
 				*)
-				ErrorChoies;
+				echo "please choies valied option";
 				;;
+
 		esac
 	done
 };
