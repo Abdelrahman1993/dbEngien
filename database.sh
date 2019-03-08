@@ -91,7 +91,6 @@ function useDatabase {
 		do
 			case $opt in
 				"create New Table")
-					echo "welcome to create new section";
 					createTable;
 					break ;
 					;;
