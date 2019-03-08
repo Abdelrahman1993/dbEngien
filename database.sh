@@ -14,6 +14,35 @@ function createDatabase {
 }
 #####################################################
 
+###################################################
+function listDatabases {
+	i=1;
+	for DB in `ls $DBPATH`
+	do
+		DBARR[$i]=$DB;
+		let i=i+1;
+	done
+
+	if [[ ${#DBARR[@]} -eq 0 ]]; 
+		then
+			echo "Databases is Empty ";
+			main;
+	fi
+
+	echo "Available Databases : ";
+	i=1;
+	for DB in `ls $DBPATH`
+	do
+		DBARR[$i]=$DB;
+		echo $i") "$DB;
+		let i=i+1;
+	done
+
+		main;
+	
+}
+#####################################
+
 
 
 
@@ -30,6 +59,7 @@ function  main {
 		case $opt in
 			"create New Database")
 				createDatabase;
+				main;
 				echo "ddddddddddddddddd";
 				break ;
 				;;
@@ -38,7 +68,7 @@ function  main {
 				break ;
 				;;
 			"Show Databases")
-
+				listDatabases;
 				break ;
 				;;
 			"Drop Databas")
