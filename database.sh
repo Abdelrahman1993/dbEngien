@@ -44,7 +44,7 @@ function listDatabases {
 function dropDatabase {
 
 	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
-	containsElement ${DBARR[$choise]};
+	containsElement ${DBARR[$choise]} "${DBARR[@]}";
 	if [[  "$?" == "1" ]]; 
 	then
 			rm -r $DBPATH/${DBARR[$choise]};
@@ -61,7 +61,7 @@ function dropDatabase {
 ##########################################
 containsElement () {
     local e
-    for e in "${DBARR[@]}"
+    for e in "${@:2}"
     do
         if [[ "$e" == "$1" ]]
             then 
@@ -92,6 +92,7 @@ function useDatabase {
 			case $opt in
 				"create New Table")
 					createTable;
+					useDatabase $?;
 					break ;
 					;;
 				"CRUD Table")
@@ -100,10 +101,13 @@ function useDatabase {
 					;;
 				"Show Tables")
 					listTables;
+					useDatabase $?;
 					break ;
 					;;
 				"Drop Table")
-					echo "welcome to drop section";
+					listTables;
+					dropTable;
+					useDatabase $?;
 					break ;
 					;;
 				"Return TO Main Menu")
@@ -207,13 +211,9 @@ function createTable {
 	else	
 		echo -e "\n\t This Table  Exists";
 	fi
-	useDatabase $Cho;
-	
+	return $Cho;
 }
-
-
 ################################################
-
 function listTables {
 	i=1;
 	for TB in `ls $DBPATH/${DBARR[$Cho]}/`
@@ -225,8 +225,7 @@ function listTables {
 	if [[ ${#TBARR[@]} -eq 0 ]]; 
 		then
 			echo "Database is Empty No tables available";
-			useDatabase $Cho;
-			return ;
+			return $Cho;
 	fi
 
 	echo "Available Tables : ";
@@ -239,7 +238,7 @@ function listTables {
 		let i=i+1;
 	done
 	echo -e "\n---------------------------------------------\n";
-	useDatabase $Cho;
+	return $Cho;
 	# if [[ ! "$1" ]]; then
 	# 	return 0;
 	# fi
@@ -251,9 +250,21 @@ function listTables {
 }
 
 ##################################################
-
-
-
+function dropTable {
+	read -p "Choose Table You Want To Drop It From The Above Tables List : " choiseT ;
+	containsElement ${TBARR[$choiseT]} "${TBARR[@]}";
+	if [[  "$?" == "1" ]]; then
+		rm  $DBPATH/${DBARR[$Cho]}/${TBARR[$choiseT]};
+		TBARR[$choiseT]="";
+	else
+		{
+			echo "out of range";
+			listTables;
+			dropTable;
+		}
+	fi
+	return $Cho;
+}
 
 ###########################################
 function  main {
