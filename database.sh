@@ -22,12 +22,37 @@ function createDatabase {
 
 }
 #####################################################
+# Drop Database From Databases list
+function dropDataBase {
+	echo -e "\n"
+	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
+	containsElement ${DBARR[$choise]} "${DBARR[@]}";
+	if [[  "$?" == "1" ]]; 
+	then
+		read -p "Are You Sure Droping ${DBARR[$choise]} Database [Y/N] " response;
+		case $response in 
+			[yY][eE][sS]|[yY]) 
+	        	rm -r $DBPATH/${DBARR[$choise]};
+	        	DBARR[$choise]="";
+	        	echo -e "\t${DBARR[@]}";
+	    	;;
+	    	*)
+				main;
+			;;
+		esac	
+	else
+		{
+			printHash;
+			echo "out of range";
+			listDB;
+			dropDB;
+		}
 
+	fi
 
+}
 
-
-
-
+#==================================================
 function  main {
 	echo "---------------------------------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
@@ -39,7 +64,6 @@ function  main {
 		case $opt in
 			"create New Database")
 				createDatabase;
-				echo "ddddddddddddddddd";
 				break ;
 				;;
 			"Use Database")
@@ -51,7 +75,9 @@ function  main {
 				break ;
 				;;
 			"Drop Databas")
-
+			echo "helll"
+				dropDataBase;
+				echo "hi"
 				break ;
 				;;
 			"Quit")
