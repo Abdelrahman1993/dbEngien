@@ -54,7 +54,7 @@ function dropDatabase {
 	if [[  "$?" == "1" ]]; 
 	then
 			rm -r $DBPATH/${DBARR[$choise]};
-			DBARR[$choise]="";
+			#DBARR[$choise]="";
 			echo -e "Deleted successfuly"
 	else
 		{
@@ -77,6 +77,68 @@ containsElement () {
     return 0
 }
 #==================================================
+
+
+#############################################
+# Use Database From Databases list and list Tables Operations
+function useDatabase {
+	
+	choice=$1;
+	if [[  "$1" == "" ]]; then
+		read -p "Choose Database You Want To Use It From The Above Databases List : " Cho ;
+		else {
+			let Cho=choice;
+		}
+	fi
+	containsElement ${DBARR[$Cho]} "${DBARR[@]}";
+	if [[  $? == 1 ]]; then	
+		
+		options=("create New Table" "CRUD Table" "Show Tables" "Drop Table" "Return TO Main Menu" "Quit");
+		PS3="Enter Your Choice : " ;
+		select opt in  "${options[@]}"
+		do
+			case $opt in
+				"create New Table")
+					echo "welcome to create new section";
+					break ;
+					;;
+				"CRUD Table")
+					echo "welcome to Crud section";
+					break ;
+					;;
+				"Show Tables")
+					echo "welcome to show section";
+					break ;
+					;;
+				"Drop Table")
+					echo "welcome to drop section";
+					break ;
+					;;
+				"Return TO Main Menu")
+					main;
+					break ;
+					;;
+				"Quit")
+					exit -1 ;
+					break
+				;;
+				*)
+				echo "Invalid operation entry";
+				;;
+			esac
+		done
+
+	else
+		{
+			echo "Invalid database selection entry";
+			listDatabases ;
+			handleDatabase;
+		}	
+	fi
+}
+
+###########################################
+
 function  main {
 	echo "---------------------------------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
@@ -92,7 +154,8 @@ function  main {
 				break ;
 				;;
 			"Use Database")
-
+				listDatabases;
+				useDatabase;
 				break ;
 				;;
 			"Show Databases")
