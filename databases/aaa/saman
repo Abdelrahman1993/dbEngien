@@ -1,9 +1,8 @@
-Table Name:abdo 
 The Number Of Columns Is:2
 id:Number
-name:String
+mail:String
 1
-id:name
+id:mail
 ===========================
-55:egse
+55:rrr
 66:egse
