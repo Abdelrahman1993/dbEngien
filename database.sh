@@ -311,8 +311,8 @@ function crudOperations {
 					break ;
 					;;
 				"Display Record")
-					# displayRw;
-					# crudOperations $?;
+					displayRw;
+					crudOperations $?;
 					echo "welcome to Display Record section"
 					break ;
 					;;
@@ -422,7 +422,6 @@ function chk_pk()
 function insertRow {
 
 		noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
-	  echo $noCols
 		ignoredLines=$(($noCols+5))
 	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
 	  pkVal=$((noCols+5)) 
@@ -481,7 +480,6 @@ function displayTable
 	noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
 	ignoredLines=$(($noCols+4))
 	TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
-	echo $ignoredLines
 	echo -e "\n--------Table Data ----";
 	tail -n +$ignoredLines $TblName
 	return $tChoice
@@ -595,7 +593,6 @@ function row_line_no()
   
   TblName=$1 # the send table
   rowToDisplay=$2 # the send pk
-  ########## table Info ###########
   noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
   ignoredLines=$(($noCols+5))
   ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
@@ -613,6 +610,52 @@ function row_line_no()
 }
 
 ############################################################
+############################################################
+#Display Row With Primarykey
+function displayRw()
+{
+  
+  TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}
+	noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+	ignoredLines=$(($noCols+5))
+  ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
+	pkVal=$((noCols+3)) 
+	pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
+  rowCounter=$(($noCols+6))
+  #################################
+  while true 
+  do 
+   read -p "Enter The Primary Key You Want To Display It's Record: " rowToDisplay
+    if [ $rowToDisplay ]
+     then break
+    fi 
+  done
+  #################################
+  
+  pkFnd=$(chk_pk $rowToDisplay)
+  if [ $pkFnd == 1 ]
+  then 
+   {
+     printHash; 
+     echo "The Result Is : ";
+     pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `;
+     pkFndLine=$(($pkFndLine+$noCols+5));
+     sed -n "${pkFndLine}p" $TblName  ;
+   }
+  else
+    echo "No Record Found With This Primarykey Value ";
+  fi     
+   
+  
+  return $tChoice
+  
+}
+
+#################################################
+
+
+##############################################
+
 ##############################################
 function  main {
 	echo "---------------------------------------------------------------------------";
