@@ -317,8 +317,8 @@ function crudOperations {
 					break ;
 					;;
 				"Delete Record")
-					# deleteRw;
-					# crudOperations $?;
+					deleteRw;
+					crudOperations $?;
 					echo "welcome to Delete Record section"
 					break ;
 					;;
@@ -652,6 +652,43 @@ function displayRw()
 }
 
 #################################################
+
+
+
+######################################################
+deleteRw()
+{
+ 
+ 
+  TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
+  while true 
+  do 
+   read -p "Enter The Primarykey You Want To Delete It's Record : " pkToDelete # update using pk
+    if [ $pkToDelete ]
+     then break
+    fi 
+  done
+ 
+  pkFnd=$(chk_pk $pkToDelete)
+  if [ $pkFnd == 1 ]
+  then 
+   {
+    rowToDelete=$(row_line_no $TblName $pkToDelete)
+    #  echo "Deleted Values Are : "
+    #  sed -n "${rowToDelete}p" $TblName 
+    #  printHash;
+     sed -i "${rowToDelete}d" $TblName && echo "Row Deleted Successfully" 
+   }
+  else
+   {
+    echo "Primarykey not found"
+   } 
+  fi
+  return $tChoice;
+}
+
+
+#############################################
 
 
 ##############################################
