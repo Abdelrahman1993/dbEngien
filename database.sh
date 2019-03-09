@@ -299,14 +299,14 @@ function crudOperations {
 					break ;
 					;;
 				"Update")
-					# updateRw;
-					# crudOperations $?;
-					echo "welcome to update section"
+					updateRow;
+					crudOperations $?;
+					# echo "welcome to update section"
 					break ;
 					;;
 				"Display Table")
-					# displayTB;
-					# crudOperations $?;
+					displayTable;
+					crudOperations $?;
 					echo "welcome to Display section"
 					break ;
 					;;
@@ -355,8 +355,6 @@ function show_columns()
 			noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
 			lineToShow=$((noCols+4)) # this line contains the table column's names
 			pkVal=`cut -f1 -d: $TblName | head -$((noCols+3))  | tail -1 `   #the pk value not pk name
-			echo $pkVal
-			echo "+_+_+_++_+-=-----===-=-=-=+_++++"
 			pkCol=$((pkVal+2))
 			pkColName=`cut -f1 -d: $TblName | head -$pkCol  | tail -1 `
 			echo "Table Columns : "
@@ -368,8 +366,7 @@ function show_columns()
 				echo  " $((colArrIndex)). $curColName " 
 				colArrIndex=$((colArrIndex+1)) 
         done  
-       echo "$pkColName Is Primary Key"
-       
+			echo "$pkColName Is Primary Key"
 }
 #####################################
 
@@ -385,27 +382,25 @@ function get_column_type()
   
   curCellDataType=` cut -f2 -d: $TblName | head -$((noCols+2))  | tail -$noCols | head -$curNoCols | tail -1 `
   if [ $curCellDataType = "Number" ] 
-   then 
-     echo $FND
+		then 
+		echo $FND
   else
-     echo $NOTFND
+		echo $NOTFND
   fi  
-  
   #echo $curCellDataType
 
 }
 #############################################
 function chk_column_type()
 {
-   sendColVal=$1 #the user value
-   sendColValType=${sendColVal//[^0-9]/} 
-   if [[ $sendColVal == $sendColValType ]]
-    then 
-      echo $FND
-   else
-      echo $NOTFND   
-   fi   
- 
+	sendColVal=$1 #the user value
+	sendColValType=${sendColVal//[^0-9]/} 
+	if [[ $sendColVal == $sendColValType ]]
+	then 
+		echo $FND
+	else
+		echo $NOTFND   
+	fi   
 }
 ##########################################
 
@@ -413,86 +408,208 @@ function chk_pk()
 {
     sendPkVal=$1 #the user value
       
-       #show_table_info #######
     noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
 	ignoredLines=$(($noCols+5))
 	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
 	  
 	pkVal=$((noCols+3)) 
 	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
-	 tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
+	tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
 	  [ $tstFound ] && echo $FND || echo $NOTFND
-	  
-	
-     
-       
 }
 
 ###############################################
 function insertRow {
 
-	noCols=$((`awk -F: '{if (NR == 3) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+		noCols=$((`awk -F: '{if (NR == 3) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
 	  ignoredLines=$(($noCols+7))
 	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
 	  pkVal=$((noCols+5)) 
 	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 ` #the pk value not pk name
-	 curNoCols=1 #index to the column which be enterd
-	 echo "Insert The Columns Values In this Sequense : " # You Want To Insert Into..pk mandatory "
-	 # to display the columns of the selected table 
-	 show_columns $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}          
-	 while [ $curNoCols -le $noCols ]
-	 do
+		curNoCols=1 #index to the column which be enterd
+		echo "Insert The Columns Values In this Sequense : " # You Want To Insert Into..pk mandatory "
+		# to display the columns of the selected table 
+		show_columns $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}          
+		while [ $curNoCols -le $noCols ]
+		do
 	  ################################## Check The Cell Data Type #################
 	  while true 
-	  do 
-	   read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
+	  	do 
+			read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
 	    
-	        curCellDataType=$(get_column_type $curNoCols )
-	        curColDataType=$(chk_column_type $cellValu )
-	        if [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 1 ]]
-	          then break 
-	         
-	        elif [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 0 ]]
-	          then break 
-	          
-	         else
-	             {
-	              echo "Column Data Type Does Not Match "
-	    
-	             }  
-	         fi  
-	                
-	     done
+				curCellDataType=$(get_column_type $curNoCols )
+				curColDataType=$(chk_column_type $cellValu )
+				if [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 1 ]]
+					then break 
+				elif [[ $cellValu ]] && [[ $curCellDataType -eq $curColDataType ]] && [[ $curCellDataType -eq 0 ]]
+					then break 
+					else
+					{
+						echo "Column Data Type Does Not Match "
+					}  
+					fi  
+			done
 	  ################### Check The Primary Key Value ##################  
 	  if [ $curNoCols -eq $pkVal ]
 	  then 
 	    {
-	          chkPkRtrn=$(chk_pk $cellValu)
-	          if [ $chkPkRtrn -eq 1 ]
-	           then
-	            {
-	               echo "There Is A Row Has This Pk Val ... Try Again"
-	               break             
-	            }
-	          fi
-	       }  
-	     fi
-	     
-	     ####################################################################
-	      if [ $curNoCols -eq $noCols ]
-	       then echo -e "$cellValu" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} 
-	      else
-	        echo -n "$cellValu:" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}  
-	      fi
+				chkPkRtrn=$(chk_pk $cellValu)
+				if [ $chkPkRtrn -eq 1 ]
+					then
+					{
+						echo "There Is A Row Has This Pk Val ... Try Again"
+						break             
+					}
+				fi
+			}  
+		fi
+####################################################################
+		if [ $curNoCols -eq $noCols ]
+			then echo -e "$cellValu" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} 
+		else
+			echo -n "$cellValu:" >> $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}  
+		fi
 	  
 	  curNoCols=$((curNoCols+1))
-	 done
-	 return $tChoice;
- 
+		done
+		return $tChoice;
+}
+#############################################
+function displayTable()
+{
+ TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
+ echo "Table Data And  Structure : ";
+ cat $TblName;
+ return $tChoice
 }
 
-##############################################
 
+############################################################
+
+function updateRow
+{
+	TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}
+	noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+	pkVal=$((noCols+3)) 
+	pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
+  while true 
+  do 
+   read -p "Which Row You Want To Update Using Primarykey  : " pkToUpdate
+    if [ $pkToUpdate ]
+     then break
+    fi 
+  done
+  
+   pkFnd=$(chk_pk $pkToUpdate)
+  if [ $pkFnd == 1 ]
+  then 
+   {
+    rowToUpdate=$(row_line_no $TblName $pkToUpdate)
+    #  echo "##################" 
+    #  echo "The Row Values Are : "
+    #  sed -n "${rowToUpdate}p" $TblName 
+     echo "##################"  
+     sed -i "${rowToUpdate}d" $TblName #&& echo "Row Deleted Successfully" 
+   }
+  else
+   {
+    echo "Sorry...This Is Not A PK Value .. Try Again Later "
+   } 
+  fi
+
+  ############33
+
+  echo "Enter The Row New Values : "
+  show_columns $TblName            # to display the columns of the selected table 
+  curNoCols=1
+  
+ 
+  while [ $curNoCols -le $noCols ]
+  do
+   
+   ################################## Check The Cell Data Type #################
+  while true 
+  do 
+   read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
+    
+        curCellDataType=$(get_column_type $curNoCols )
+        curColDataType=$(chk_column_type $cellValu )
+      
+        if [ $cellValu -a $curCellDataType -eq $curColDataType -a $curCellDataType -eq 1 ]
+          then break 
+         
+        elif [ $cellValu -a $curCellDataType -eq $curColDataType -a $curCellDataType -eq 0 ]
+          then break 
+          
+         else
+             {
+              echo "Column Data Type Does Not Match"
+    
+             }  
+         fi  
+                
+     done
+
+  
+  ##################### Check The Primary Key Value ##################  
+  if [ $curNoCols -eq $pkVal ]
+  then 
+    {
+         chkPkRtrn=$(chk_pk $cellValu)
+          if [ $chkPkRtrn -eq 1 ]
+           then
+            {
+               echo " Dublicated Primarykey Value Which Should Be Unique ";
+               continue ;             
+            
+            }
+          
+          fi
+       }  
+     fi
+     ####################################################################
+      if [ $curNoCols -eq $noCols ]
+       then echo -e "$cellValu" >> $TblName 
+      else
+        echo -n "$cellValu:" >> $TblName  
+      fi
+  
+  curNoCols=$((curNoCols+1))
+ done
+ echo "Row Updated Successfully ";
+ return $tChoice;
+
+}
+
+
+############################################################
+#Get Primarykey Line Number
+
+function row_line_no()
+{
+  
+  
+  TblName=$1 # the send table
+  rowToDisplay=$2 # the send pk
+  ########## table Info ###########
+  noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
+  ignoredLines=$(($noCols+5))
+  ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
+  
+  pkVal=$((noCols+3)) 
+  pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
+  #################################
+   pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `
+   pkFndLine=$(($pkFndLine+$noCols+5))
+   
+   echo $pkFndLine
+  
+  
+  
+}
+
+############################################################
+##############################################
 function  main {
 	echo "---------------------------------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
@@ -534,3 +651,5 @@ function  main {
 	done
 };
 main;
+
+
