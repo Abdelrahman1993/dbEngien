@@ -496,27 +496,27 @@ function updateRow
 	pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
   while true 
   do 
-   read -p "Which Row You Want To Update Using Primarykey  : " pkToUpdate
+		read -p "Which Row You Want To Update Using Primarykey  : " pkToUpdate
     if [ $pkToUpdate ]
-     then break
+			then break
     fi 
   done
   
-   pkFnd=$(chk_pk $pkToUpdate)
+	pkFnd=$(chk_pk $pkToUpdate)
   if [ $pkFnd == 1 ]
   then 
-   {
+	{
     rowToUpdate=$(row_line_no $TblName $pkToUpdate)
     #  echo "##################" 
     #  echo "The Row Values Are : "
     #  sed -n "${rowToUpdate}p" $TblName 
-     echo "##################"  
-     sed -i "${rowToUpdate}d" $TblName #&& echo "Row Deleted Successfully" 
-   }
+		echo "##################"  
+		sed -i "${rowToUpdate}d" $TblName #&& echo "Row Deleted Successfully" 
+	}
   else
-   {
+	{
     echo "Sorry...This Is Not A PK Value .. Try Again Later "
-   } 
+	} 
   fi
 
   ############33
@@ -525,72 +525,56 @@ function updateRow
   show_columns $TblName            # to display the columns of the selected table 
   curNoCols=1
   
- 
   while [ $curNoCols -le $noCols ]
   do
-   
-   ################################## Check The Cell Data Type #################
+	################################## Check The Cell Data Type #################
   while true 
   do 
-   read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
+		read -p "Enter The $curNoCols Cell Value [You Must Enter Value ] : "  cellValu # update using pk
     
-        curCellDataType=$(get_column_type $curNoCols )
-        curColDataType=$(chk_column_type $cellValu )
+			curCellDataType=$(get_column_type $curNoCols )
+			curColDataType=$(chk_column_type $cellValu )
       
         if [ $cellValu -a $curCellDataType -eq $curColDataType -a $curCellDataType -eq 1 ]
           then break 
-         
         elif [ $cellValu -a $curCellDataType -eq $curColDataType -a $curCellDataType -eq 0 ]
           then break 
-          
-         else
-             {
+				else
+						{
               echo "Column Data Type Does Not Match"
-    
-             }  
-         fi  
-                
-     done
-
-  
+						}  
+				fi  
+		done
   ##################### Check The Primary Key Value ##################  
   if [ $curNoCols -eq $pkVal ]
   then 
     {
-         chkPkRtrn=$(chk_pk $cellValu)
-          if [ $chkPkRtrn -eq 1 ]
-           then
-            {
-               echo " Dublicated Primarykey Value Which Should Be Unique ";
-               continue ;             
-            
-            }
-          
-          fi
-       }  
-     fi
-     ####################################################################
+			chkPkRtrn=$(chk_pk $cellValu)
+			if [ $chkPkRtrn -eq 1 ]
+				then
+				{
+					echo " Dublicated Primarykey Value Which Should Be Unique ";
+					continue ;             
+				}
+		fi
+		}  
+	fi
+		####################################################################
       if [ $curNoCols -eq $noCols ]
-       then echo -e "$cellValu" >> $TblName 
+			then echo -e "$cellValu" >> $TblName 
       else
         echo -n "$cellValu:" >> $TblName  
       fi
-  
   curNoCols=$((curNoCols+1))
- done
- echo "Row Updated Successfully ";
- return $tChoice;
-
+	done
+	echo "Row Updated Successfully ";
+	return $tChoice;
 }
-
-
 ############################################################
 #Get Primarykey Line Number
 
 function row_line_no()
 {
-  
-  
   TblName=$1 # the send table
   rowToDisplay=$2 # the send pk
   noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
@@ -600,16 +584,10 @@ function row_line_no()
   pkVal=$((noCols+3)) 
   pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
   #################################
-   pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `
-   pkFndLine=$(($pkFndLine+$noCols+5))
-   
-   echo $pkFndLine
-  
-  
-  
+	pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `
+	pkFndLine=$(($pkFndLine+$noCols+5))
+	echo $pkFndLine
 }
-
-############################################################
 ############################################################
 #Display Row With Primarykey
 function displayRw()
@@ -645,17 +623,8 @@ function displayRw()
   else
     echo "No Record Found With This Primarykey Value ";
   fi     
-   
-  
   return $tChoice
-  
 }
-
-#################################################
-
-
-##############################################
-
 ##############################################
 function  main {
 	echo "---------------------------------------------------------------------------";
@@ -698,5 +667,3 @@ function  main {
 	done
 };
 main;
-
-
