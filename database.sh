@@ -317,8 +317,8 @@ function crudOperations {
 					break ;
 					;;
 				"Delete Record")
-					# deleteRw;
-					# crudOperations $?;
+					deleteRw;
+					crudOperations $?;
 					echo "welcome to Delete Record section"
 					break ;
 					;;
@@ -410,10 +410,10 @@ function chk_pk()
       
     noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
 	ignoredLines=$(($noCols+5))
-	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
+	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines)) #data rows
 	  
 	pkVal=$((noCols+3)) 
-	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
+	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` 
 	tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
 	  [ $tstFound ] && echo $FND || echo $NOTFND
 }
@@ -425,7 +425,7 @@ function insertRow {
 		ignoredLines=$(($noCols+5))
 	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
 	  pkVal=$((noCols+5)) 
-	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 ` #the pk value not pk name
+	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
 		curNoCols=1 #index to the column which be enterd
 		echo "Insert The Columns Values In this Sequense : " # You Want To Insert Into..pk mandatory "
 		# to display the columns of the selected table 
@@ -614,7 +614,7 @@ function displayRw()
   if [ $pkFnd == 1 ]
   then 
    {
-     printHash; 
+     
      echo "The Result Is : ";
      pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `;
      pkFndLine=$(($pkFndLine+$noCols+5));
@@ -625,6 +625,52 @@ function displayRw()
   fi     
   return $tChoice
 }
+<<<<<<< HEAD
+=======
+
+#################################################
+
+
+
+######################################################
+deleteRw()
+{
+ 
+ 
+  TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
+  while true 
+  do 
+   read -p "Enter The Primarykey You Want To Delete It's Record : " pkToDelete # update using pk
+    if [ $pkToDelete ]
+     then break
+    fi 
+  done
+ 
+  pkFnd=$(chk_pk $pkToDelete)
+  if [ $pkFnd == 1 ]
+  then 
+   {
+    rowToDelete=$(row_line_no $TblName $pkToDelete)
+    #  echo "Deleted Values Are : "
+    #  sed -n "${rowToDelete}p" $TblName 
+    #  printHash;
+     sed -i "${rowToDelete}d" $TblName && echo "Row Deleted Successfully" 
+   }
+  else
+   {
+    echo "Primarykey not found"
+   } 
+  fi
+  return $tChoice;
+}
+
+
+#############################################
+
+
+##############################################
+
+>>>>>>> 68e4d4a491c36a1bf26b0041325d06fb1a4eaabe
 ##############################################
 function  main {
 	echo "---------------------------------------------------------------------------";
