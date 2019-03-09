@@ -421,8 +421,8 @@ function chk_pk()
 ###############################################
 function insertRow {
 
-		noCols=$((`awk -F: '{if (NR == 3) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
-	  ignoredLines=$(($noCols+7))
+		noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+		ignoredLines=$(($noCols+5))
 	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
 	  pkVal=$((noCols+5)) 
 	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
@@ -475,12 +475,14 @@ function insertRow {
 		return $tChoice;
 }
 #############################################
-function displayTable()
+function displayTable
 {
- TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
- echo "Table Data And  Structure : ";
- cat $TblName;
- return $tChoice
+	noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
+	ignoredLines=$(($noCols+4))
+	TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
+	echo -e "\n--------Table Data ----";
+	tail -n +$ignoredLines $TblName
+	return $tChoice
 }
 
 
@@ -591,7 +593,6 @@ function row_line_no()
   
   TblName=$1 # the send table
   rowToDisplay=$2 # the send pk
-  ########## table Info ###########
   noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
   ignoredLines=$(($noCols+5))
   ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
@@ -609,9 +610,6 @@ function row_line_no()
 }
 
 ############################################################
-
-
-
 ############################################################
 #Display Row With Primarykey
 function displayRw()
@@ -655,6 +653,8 @@ function displayRw()
 
 #################################################
 
+
+##############################################
 
 ##############################################
 function  main {
