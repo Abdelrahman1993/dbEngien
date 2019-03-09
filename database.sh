@@ -410,10 +410,10 @@ function chk_pk()
       
     noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
 	ignoredLines=$(($noCols+5))
-	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines))
+	ignoredLines=$((`cat $TblName | wc -l `-ignoredLines)) #data rows
 	  
 	pkVal=$((noCols+3)) 
-	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` #the pk value not pk name
+	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` 
 	tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
 	  [ $tstFound ] && echo $FND || echo $NOTFND
 }
@@ -425,7 +425,7 @@ function insertRow {
 	  ignoredLines=$(($noCols+7))
 	  ignoredLines=$((`cat $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | wc -l `-ignoredLines))
 	  pkVal=$((noCols+5)) 
-	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 ` #the pk value not pk name
+	  pkVal=`cut -f1 -d: $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]} | head -$pkVal  | tail -1 `
 		curNoCols=1 #index to the column which be enterd
 		echo "Insert The Columns Values In this Sequense : " # You Want To Insert Into..pk mandatory "
 		# to display the columns of the selected table 
@@ -638,7 +638,7 @@ function displayRw()
   if [ $pkFnd == 1 ]
   then 
    {
-     printHash; 
+     
      echo "The Result Is : ";
      pkFndLine=`tail -$ignoredLines $TblName | grep -wn $rowToDisplay | cut -f1 -d: `;
      pkFndLine=$(($pkFndLine+$noCols+5));
