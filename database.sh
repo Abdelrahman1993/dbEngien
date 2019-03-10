@@ -1,7 +1,9 @@
 DBPATH="databases";
 
 #####################################################
+
 function createDatabase {
+	echo -e "\n\t---------------------------------------------------";
 	IFS= read -r -p "Enter Database Name : " dbName;
 	isAlpha='^[a-zA-Z\s]*$';
 	if [[ ! -d $DBPATH/$dbName ]];
@@ -11,6 +13,7 @@ function createDatabase {
 			mkdir $DBPATH/$dbName;
 			echo -e "\n\t" $dbName" Database Created Successfully" ;
 		else
+			clear;
 			echo -e "\n\t the name of database should not contaien \n\t space or number or spiceal charachter"
 		fi
 	else	
@@ -43,18 +46,19 @@ function listDatabases {
 }
 ###############################################
 function dropDatabase {
-
+	echo -e "\n\t---------------------------------------------------";
 	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
 	containsElement ${DBARR[$choise]} "${DBARR[@]}";
 	if [[  "$?" == "1" ]]; 
 	then
 			rm -r $DBPATH/${DBARR[$choise]};
+			clear;
 			#DBARR[$choise]="";
-			echo -e "Deleted successfuly"
+			echo -e "\tDeleted successfuly"
 			listDatabases;
 	else
 		{
-			echo "out of range";
+			echo -e "\tout of range";
 			main;
 		}
 	fi
@@ -75,7 +79,7 @@ containsElement () {
 #############################################
 # Use Database From Databases list and list Tables Operations
 function useDatabase {
-	
+	echo -e "\n\t---------------------------------------------------";
 	choice=$1;
 	if [[  "$1" == "" ]]; then
 		read -p "Choose Database You Want To Use It From The Above Databases List : " Cho ;
@@ -129,7 +133,7 @@ function useDatabase {
 
 	else
 		{
-			echo "Invalid database selection entry";
+			echo -e "\n\tInvalid database selection entry";
 			listDatabases ;
 			useDatabase;
 		}	
@@ -138,6 +142,7 @@ function useDatabase {
 
 #################################################
 function createTable {
+	echo -e "\n\t---------------------------------------------------";
 	isAlpha='^[a-zA-Z\s]*$';
 	IFS= read -r -p "Enter Table Name : " tlName ;
 		if [[ $tlName =~ $isAlpha ]]
@@ -274,7 +279,7 @@ function dropTable {
 }
 ##############################################################
 function crudOperations {
-	
+	echo -e "\n\t---------------------------------------------------";
 	choice=$1;
 	if [[  "$1" == "" ]]; then
 	read -p "Choose Table You Want To Operate On It From The Above Tables List : " tChoice ;
@@ -294,28 +299,33 @@ function crudOperations {
 		do
 			case $opt in
 				"Insert")
+					clear;
 					insertRow;
 					crudOperations $?;
 					break ;
 					;;
 				"Update")
+					clear;
 					updateRow;
 					crudOperations $?;
 					break ;
 					;;
 				"Display Table")
+					clear;
 					displayTable;
 					crudOperations $?;
 					echo "welcome to Display section"
 					break ;
 					;;
 				"Display Record")
+					clear;
 					displayRw;
 					crudOperations $?;
 					echo "welcome to Display Record section"
 					break ;
 					;;
 				"Delete Record")
+					clear;
 					deleteRw;
 					crudOperations $?;
 					echo "welcome to Delete Record section"
@@ -349,6 +359,7 @@ function crudOperations {
 declare -a tblColArr
 function show_columns()
 {
+	echo -e "\n\t---------------------------------------------------";
 			TblName=$1
 			colArrIndex=1      
 			noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
@@ -403,7 +414,7 @@ function chk_column_type()
 }
 ##########################################
 
-function chk_pk()
+function checkPrimKey()
 {
     sendPkVal=$1 #the user value
       
@@ -452,7 +463,7 @@ function insertRow {
 	  if [ $curNoCols -eq $pkVal ]
 	  then 
 	    {
-				chkPkRtrn=$(chk_pk $cellValu)
+				chkPkRtrn=$(checkPrimKey $cellValu)
 				if [ $chkPkRtrn -eq 1 ]
 					then
 					{
@@ -498,7 +509,7 @@ function updateRow
     fi 
   done
   
-	pkFnd=$(chk_pk $pkToUpdate)
+	pkFnd=$(checkPrimKey $pkToUpdate)
   if [ $pkFnd == 1 ]
   then 
 	{
@@ -545,7 +556,7 @@ function updateRow
   if [ $curNoCols -eq $pkVal ]
   then 
     {
-			chkPkRtrn=$(chk_pk $cellValu)
+			chkPkRtrn=$(checkPrimKey $cellValu)
 			if [ $chkPkRtrn -eq 1 ]
 				then
 				{
@@ -606,7 +617,7 @@ function displayRw()
   done
   #################################
   
-  pkFnd=$(chk_pk $rowToDisplay)
+  pkFnd=$(checkPrimKey $rowToDisplay)
   if [ $pkFnd == 1 ]
   then 
    {
@@ -634,7 +645,7 @@ deleteRw()
     fi 
   done
  
-  pkFnd=$(chk_pk $pkToDelete)
+  pkFnd=$(checkPrimKey $pkToDelete)
   if [ $pkFnd == 1 ]
   then 
    {
@@ -649,9 +660,15 @@ deleteRw()
   return $tChoice;
 }
 ##############################################
+function welcome(){
+	echo -e "\n\t---------------------------------------------------";
+	echo -e "\t\twelcom to SAMMAN and ABDO DBengien"
+	echo -e "\t----------------------------------------------------";
+}
+##############################################
 
 function  main {
-	echo "---------------------------------------------------------------------------";
+	echo -e "\t\n----------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
 
 	PS3="Enter Your Choice : " ;
@@ -660,21 +677,25 @@ function  main {
 	do
 		case $opt in
 			"create New Database")
+				clear;
 				createDatabase;
 				main;
 				break ;
 				;;
 			"Use Database")
+				clear;
 				listDatabases;
 				useDatabase;
 				break ;
 				;;
 			"Show Databases")
+				clear;
 				listDatabases;
 				main;
 				break ;
 				;;
 			"Drop Databas")
+				clear;
 				listDatabases;
 				dropDatabase;
 				main;
@@ -690,4 +711,5 @@ function  main {
 		esac
 	done
 };
+welcome;
 main;
