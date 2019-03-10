@@ -1,7 +1,7 @@
 DBPATH="databases";
 
 #####################################################
-
+#function to create database
 function createDatabase {
 	echo -e "\n\t---------------------------------------------------";
 	IFS= read -r -p "Enter Database Name : " dbName;
@@ -16,12 +16,23 @@ function createDatabase {
 			clear;
 			echo -e "\n\t the name of database should not contaien \n\t space or number or spiceal charachter"
 		fi
-	else	
-		echo -e "\n\t This Database is Exists";
+	else
+	
+		if [ -z $dbName ]
+			then
+						echo $dbName;
+						echo -e "\n\t you didn't enter the name"
+		else	
+					echo $dbName;
+					echo -e "\n\t This Database is Exists";
+			
+		fi	
+		
 	fi
 	main;
 }
 ###################################################
+#function to list available database
 function listDatabases {
 	i=1;
 	for DB in `ls $DBPATH`
@@ -45,6 +56,7 @@ function listDatabases {
 	done
 }
 ###############################################
+#function to drop spacific database
 function dropDatabase {
 	echo -e "\n\t---------------------------------------------------";
 	read -p "Choose Database You Want To Drop It From The Above Databases List : " choise ;
@@ -64,6 +76,7 @@ function dropDatabase {
 	fi
 }
 ##########################################
+#function to check if array contains spacific element DBs-->>DB  Tables-->>Table
 containsElement () {
     local e
     for e in "${@:2}"
@@ -77,7 +90,7 @@ containsElement () {
 }
 
 #############################################
-# Use Database From Databases list and list Tables Operations
+# function used to make operations on database create table, list tables, drop table, crud operation
 function useDatabase {
 	echo -e "\n\t---------------------------------------------------";
 	choice=$1;
@@ -96,28 +109,32 @@ function useDatabase {
 		do
 			case $opt in
 				"create New Table")
+				  clear;
 					createTable;
 					useDatabase $?;
 					break ;
 					;;
 				"CRUD Table")
-					echo "welcome to Crud section";
+					clear;
 					listTables;
 					crudOperations;
 					break ;
 					;;
 				"Show Tables")
+					clear;
 					listTables;
 					useDatabase $?;
 					break ;
 					;;
 				"Drop Table")
+					clear;
 					listTables;
 					dropTable;
 					useDatabase $?;
 					break ;
 					;;
 				"Return TO Main Menu")
+					clear;
 					main;
 					break ;
 					;;
@@ -126,6 +143,7 @@ function useDatabase {
 					break
 				;;
 				*)
+			
 				echo "Invalid operation entry";
 				;;
 			esac
@@ -141,6 +159,7 @@ function useDatabase {
 }
 
 #################################################
+#function used to create table on database
 function createTable {
 	echo -e "\n\t---------------------------------------------------";
 	isAlpha='^[a-zA-Z\s]*$';
@@ -159,22 +178,23 @@ function createTable {
 			chmod +x $DBPATH/${DBARR[$Cho]}/$tlName;
 			    echo "Table Name:$tlName " >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    read -p "Enter The Number Of Columns : " tlCol;
-					if [[ $tlCol -eq 0 ]]
+					if [[ $tlCol -eq 0 ]] ||  [[ $tlCol =~ $isAlpha ]]
 						then
-						echo -e "the number of columns must be greater than zero"
+						echo -e "the number of columns must be number and greater than zero"
 						rm $DBPATH/${DBARR[$Cho]}/$tlName
 						createTable;
 						return $Cho;
 					fi
+					
 			    echo -e "The Number Of Columns Is:$tlCol" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    for (( i = 1; i <= tlCol ; i++ )); do
 
 			    	IFS= read -r -p "Enter Name Of The Column Number $i : " ColName ;
-						if [[ $ColName =~ $isAlpha ]]
+					if [[ $ColName =~ $isAlpha ]] && [[ -n $ColName ]]
 						then
 							echo " "
 						else
-							echo -e "\n\t the name of Column should not contaien \n\t space or number or spiceal charachter"
+							echo -e "\n\t the name of Column should not contaien \n\t space or number or spiceal charachter or emptey name"
 							rm $DBPATH/${DBARR[$Cho]}/$tlName
 							createTable;
 							return $Cho;
@@ -228,12 +248,18 @@ function createTable {
 				echo -e "===========================" >> $DBPATH/${DBARR[$Cho]}/$tlName;  
 				
 				echo $tlName": Table Created Successfully";
-	else	
-		echo -e "\n\t This Table  Exists";
+	else
+		if [ -z $tlName ]
+			then
+						echo -e "\n\t you didn't enter the name"
+		else	
+					echo -e "\n\t This Table is Exists";
+		fi
 	fi
 	return $Cho;
 }
 ################################################
+#function used to list available tables in the database
 function listTables {
 	i=1;
 	for TB in `ls $DBPATH/${DBARR[$Cho]}/`
@@ -245,7 +271,8 @@ function listTables {
 	if [[ ${#TBARR[@]} -eq 0 ]]; 
 		then
 			echo "Database is Empty No tables available";
-			return $Cho;
+			listDatabases;
+			useDatabase;
 	fi
 
 	echo "Available Tables : ";
@@ -262,7 +289,9 @@ function listTables {
 }
 
 ##################################################
+#function to drop spacific colums
 function dropTable {
+
 	read -p "Choose Table You Want To Drop It From The Above Tables List : " choiseT ;
 	containsElement ${TBARR[$choiseT]} "${TBARR[@]}";
 	if [[  "$?" == "1" ]]; then
@@ -272,12 +301,14 @@ function dropTable {
 		{
 			echo "out of range";
 			listTables;
-			dropTable;
+			echo $Cho
+			useDatabase $Cho;
 		}
 	fi
 	return $Cho;
 }
 ##############################################################
+#function used to perform crud operation on atable
 function crudOperations {
 	echo -e "\n\t---------------------------------------------------";
 	choice=$1;
@@ -326,7 +357,7 @@ function crudOperations {
 					;;
 				"Delete Record")
 					clear;
-					deleteRw;
+					deleteRow;
 					crudOperations $?;
 					echo "welcome to Delete Record section"
 					break ;
@@ -356,6 +387,7 @@ function crudOperations {
 }
 
 ############################################################
+#function used to display columns name when update
 declare -a tblColArr
 function show_columns()
 {
@@ -363,8 +395,8 @@ function show_columns()
 			TblName=$1
 			colArrIndex=1      
 			noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
-			lineToShow=$((noCols+4)) # this line contains the table column's names
-			pkVal=`cut -f1 -d: $TblName | head -$((noCols+3))  | tail -1 `   #the pk value not pk name
+			lineToShow=$((noCols+4)) #get column's names
+			pkVal=`cut -f1 -d: $TblName | head -$((noCols+3))  | tail -1 `   
 			pkCol=$((pkVal+2))
 			pkColName=`cut -f1 -d: $TblName | head -$pkCol  | tail -1 `
 			echo "Table Columns : "
@@ -378,7 +410,9 @@ function show_columns()
         done  
 			echo "$pkColName Is Primary Key"
 }
+
 #####################################
+#get type of column from database
 
 declare -r FND=1;
 declare -r NOTFND=0;
@@ -397,10 +431,11 @@ function get_column_type()
   else
 		echo $NOTFND
   fi  
-  #echo $curCellDataType
+
 
 }
 #############################################
+#check the user input column type
 function chk_column_type()
 {
 	sendColVal=$1 #the user value
@@ -413,10 +448,11 @@ function chk_column_type()
 	fi   
 }
 ##########################################
+#check primary key available or not
 
 function checkPrimKey()
 {
-    sendPkVal=$1 #the user value
+    sendPkVal=$1 
       
     noCols=`awk -F: '{if (NR == 2) print $2 }' $TblName`
 	ignoredLines=$(($noCols+5))
@@ -424,11 +460,12 @@ function checkPrimKey()
 	  
 	pkVal=$((noCols+3)) 
 	pkVal=`cut -f1 -d: $TblName | head -$pkVal  | tail -1 ` 
-	tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` #grep -x or -w or -wn
+	tstFound=` tail -$ignoredLines $TblName | cut -f$pkVal -d: | grep -w $sendPkVal ` 
 	  [ $tstFound ] && echo $FND || echo $NOTFND
 }
 
 ###############################################
+#function used to insert row in column
 function insertRow {
 
 		noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
@@ -485,6 +522,7 @@ function insertRow {
 		return $tChoice;
 }
 #############################################
+#display table data
 function displayTable
 {
 	noCols=$((`awk -F: '{if (NR == 2) print $2 }' $DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}`));
@@ -495,6 +533,7 @@ function displayTable
 	return $tChoice
 }
 ############################################################
+#function used to update row
 function updateRow
 {
 	TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}
@@ -517,7 +556,7 @@ function updateRow
     #  echo "##################" 
     #  echo "The Row Values Are : "
     #  sed -n "${rowToUpdate}p" $TblName 
-		echo "##################"  
+	
 		sed -i "${rowToUpdate}d" $TblName #&& echo "Row Deleted Successfully" 
 	}
   else
@@ -528,7 +567,7 @@ function updateRow
 
   ############33
 
-  echo "Enter The Row New Values : "
+  # echo "Enter The Row New Values : "
   show_columns $TblName            # to display the columns of the selected table 
   curNoCols=1
   
@@ -596,6 +635,8 @@ function row_line_no()
 	echo $pkFndLine
 }
 ############################################################
+
+############################################################
 #Display Row With Primarykey
 function displayRw()
 {
@@ -634,7 +675,8 @@ function displayRw()
 }
 
 ######################################################
-deleteRw()
+#function used to delete row
+deleteRow()
 {
   TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
   while true 
@@ -661,11 +703,13 @@ deleteRw()
 }
 ##############################################
 function welcome(){
+	clear;
 	echo -e "\n\t---------------------------------------------------";
-	echo -e "\t\twelcom to SAMMAN and ABDO DBengien"
+	echo -e "\t\twelcom to Bash shell DBengine"
 	echo -e "\t----------------------------------------------------";
 }
 ##############################################
+#The main function <<entry point>>
 
 function  main {
 	echo -e "\t\n----------------------------------------------------";
@@ -711,5 +755,6 @@ function  main {
 		esac
 	done
 };
+
 welcome;
 main;
