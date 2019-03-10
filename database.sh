@@ -2,15 +2,16 @@ DBPATH="databases";
 
 #####################################################
 function createDatabase {
-	read -p "Enter Database Name : " dbName;
+	IFS= read -r -p "Enter Database Name : " dbName;
+	isAlpha='^[a-zA-Z\s]*$';
 	if [[ ! -d $DBPATH/$dbName ]];
 		then
-		if [[ $dbName =~ [a-zA-Z]+$ ]];
+		if [[ $dbName =~ $isAlpha ]];
 			then	
 			mkdir $DBPATH/$dbName;
 			echo -e "\n\t" $dbName" Database Created Successfully" ;
 		else
-			echo -e "\n\t the name of database is not valied"
+			echo -e "\n\t the name of database should not contaien \n\t space or number or spiceal charachter"
 		fi
 	else	
 		echo -e "\n\t This Database is Exists";
@@ -130,34 +131,49 @@ function useDatabase {
 		{
 			echo "Invalid database selection entry";
 			listDatabases ;
-			handleDatabase;
+			useDatabase;
 		}	
 	fi
 }
 
 #################################################
 function createTable {
-	read -p "Enter Table Name : " tlName ;
-		if [[ $tlName =~ [a-zA-Z]+$ ]]
+	isAlpha='^[a-zA-Z\s]*$';
+	IFS= read -r -p "Enter Table Name : " tlName ;
+		if [[ $tlName =~ $isAlpha ]]
 			then
 			echo " "
 		else
-			echo "\nTable name not valied\n"
-			useDatabase;
+			echo -e "\n\t the name of table should not contaien \n\t space or number or spiceal charachter"
+			createTable;
+			return $Cho;
 		fi
 	if [[ ! -e $DBPATH/${DBARR[$Cho]}/$tlName ]]
 		then	
 			touch $DBPATH/${DBARR[$Cho]}/$tlName;
 			chmod +x $DBPATH/${DBARR[$Cho]}/$tlName;
-			#if [[ $? -eq 0 ]]; then
-				# echo -e "\n\t$tlName Structure" > $DBPATH/${DBARR[$Cho]}/$tlName;
 			    echo "Table Name:$tlName " >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    read -p "Enter The Number Of Columns : " tlCol;
+					if [[ $tlCol -eq 0 ]]
+						then
+						echo -e "the number of columns must be greater than zero"
+						rm $DBPATH/${DBARR[$Cho]}/$tlName
+						createTable;
+						return $Cho;
+					fi
 			    echo -e "The Number Of Columns Is:$tlCol" >> $DBPATH/${DBARR[$Cho]}/$tlName;
-			    # echo -e "$tlName Columns" >> $DBPATH/${DBARR[$Cho]}/$tlName;
 			    for (( i = 1; i <= tlCol ; i++ )); do
 
-			    	read -p "Enter Name Of The Column Number $i : " ColName ;
+			    	IFS= read -r -p "Enter Name Of The Column Number $i : " ColName ;
+						if [[ $ColName =~ $isAlpha ]]
+						then
+							echo " "
+						else
+							echo -e "\n\t the name of Column should not contaien \n\t space or number or spiceal charachter"
+							rm $DBPATH/${DBARR[$Cho]}/$tlName
+							createTable;
+							return $Cho;
+						fi
 			    	colArr[$i]=$ColName ; 
 					echo  -n "$ColName" >> $DBPATH/${DBARR[$Cho]}/$tlName ;
 					PS3="Enter Column $ColName Type : ";
@@ -207,9 +223,6 @@ function createTable {
 				echo -e "===========================" >> $DBPATH/${DBARR[$Cho]}/$tlName;  
 				
 				echo $tlName": Table Created Successfully";
-			#else	
-				#echo -e "\n\t Error Done While Creating the Table" ;
-			#fi
 	else	
 		echo -e "\n\t This Table  Exists";
 	fi
@@ -241,14 +254,6 @@ function listTables {
 	done
 	echo -e "\n---------------------------------------------\n";
 	return $Cho;
-	# if [[ ! "$1" ]]; then
-	# 	return 0;
-	# fi
-
-	# if [[ "$1"=="show" ]]; then
-	# 	return $Cho;
-	# fi
-
 }
 
 ##################################################
@@ -267,11 +272,6 @@ function dropTable {
 	fi
 	return $Cho;
 }
-
-###########################################
-
-
-
 ##############################################################
 function crudOperations {
 	
@@ -301,7 +301,6 @@ function crudOperations {
 				"Update")
 					updateRow;
 					crudOperations $?;
-					# echo "welcome to update section"
 					break ;
 					;;
 				"Display Table")
@@ -323,7 +322,7 @@ function crudOperations {
 					break ;
 					;;
 				"Return TO Pervious Menu")
-					tableOperations $Cho;
+					crudOperations $Cho;
 					;;
 				"Return TO Main Menu")
 					main;
@@ -484,10 +483,7 @@ function displayTable
 	tail -n +$ignoredLines $TblName
 	return $tChoice
 }
-
-
 ############################################################
-
 function updateRow
 {
 	TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]}
@@ -625,18 +621,10 @@ function displayRw()
   fi     
   return $tChoice
 }
-<<<<<<< HEAD
-=======
-
-#################################################
-
-
 
 ######################################################
 deleteRw()
 {
- 
- 
   TblName=$DBPATH/${DBARR[$Cho]}/${TBARR[$tChoice]};
   while true 
   do 
@@ -651,27 +639,17 @@ deleteRw()
   then 
    {
     rowToDelete=$(row_line_no $TblName $pkToDelete)
-    #  echo "Deleted Values Are : "
-    #  sed -n "${rowToDelete}p" $TblName 
-    #  printHash;
      sed -i "${rowToDelete}d" $TblName && echo "Row Deleted Successfully" 
    }
   else
    {
     echo "Primarykey not found"
-   } 
+		} 
   fi
   return $tChoice;
 }
-
-
-#############################################
-
-
 ##############################################
 
->>>>>>> 68e4d4a491c36a1bf26b0041325d06fb1a4eaabe
-##############################################
 function  main {
 	echo "---------------------------------------------------------------------------";
 	options=("create New Database" "Use Database" "Show Databases" "Drop Databas" "Quit");
